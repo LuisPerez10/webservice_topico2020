@@ -1,0 +1,5 @@
+/dist
+/tmp
+/baszel-out
+/node_modules
+.env
