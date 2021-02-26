@@ -30,7 +30,7 @@ app.use('/api/upload', require('./routes/uploads'));
 
 
 app.use('/api/categorias', require('./routes/categorias'));
-app.use('/api/servicios', require('./routes/servicios'));
+// app.use('/api/servicios', require('./routes/servicios'));
 app.use('/api/trabajadorservicios', require('./routes/trabajadorServicios'));
 app.use('/api/horarios', require('./routes/horarios'));
 
