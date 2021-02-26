@@ -1,6 +1,6 @@
 const { response } = require('express');
 
-const Servicio = require('../models/Servicio');
+const Servicio = require('../models/servicio');
 
 const obtenerServiciosPorIdCategoria = async(req, res) => {
     const categoiraId = req.params.id;
