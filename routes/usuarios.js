@@ -15,6 +15,7 @@ const router = Router();
 
 router.get('/:key', verificarKeyUnica);
 
+
 router.post('/', [
         check('nombre', 'El nombre es obligatorio').not().isEmpty(),
         check('apellido', 'El apellido es obligatorio').not().isEmpty(),
