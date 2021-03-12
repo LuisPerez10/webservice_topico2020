@@ -4,6 +4,7 @@ const { findByIdAndUpdate, findByIdAndRemove, where } = require('../models/traba
 
 
 const crearTrabajadorServicio = async(req, res) => {
+    console.log('req.body');
     console.log(req.body);
     const serviciosList = req.body.serviciosList;
     console.log(serviciosList);

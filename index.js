@@ -28,6 +28,7 @@ app.use('/api/usuarios', require('./routes/usuarios'));
 app.use('/api/upload', require('./routes/uploads'));
 
 
+app.use('/api/notificacion', require('./routes/notificacion'));
 app.use('/api/login', require('./routes/auth'));
 app.use('/api/categorias', require('./routes/categorias'));
 app.use('/api/servicios', require('./routes/servicios'));

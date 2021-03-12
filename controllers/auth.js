@@ -22,6 +22,16 @@ const login = async(req, res = response) => {
             });
         }
 
+        if (usuarioDB.estado == 'inhabilitado') {
+            console.log('Usuario inhabilitado');
+            return res.status(400).json({
+                ok: false,
+                msg: 'Usuario inhabilitado'
+            });
+        }
+
+
+
         // Verificar contraseña
         const validPassword = bcrypt.compareSync(password, usuarioDB.password);
         if (!validPassword) {

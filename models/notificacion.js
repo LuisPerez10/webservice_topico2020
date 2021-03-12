@@ -20,4 +20,4 @@ NotificacionSchema.method('toJSON', function() {
 
 
 
-module.exports = model('Horario', NotificacionSchema);
+module.exports = model('Notificacion', NotificacionSchema);

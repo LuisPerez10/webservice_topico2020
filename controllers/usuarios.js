@@ -30,6 +30,67 @@ const verificarKeyUnica = async(req, res) => {
         });
     }
 }
+
+
+const actualizarUsuario = async(req, res = response) => {
+
+    // TODO: Validar token y comprobar si es el usuario correcto
+
+    const uid = req.params.id;
+
+
+    try {
+
+        const usuarioDB = await Usuario.findById(uid);
+
+        if (!usuarioDB) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'No existe un usuario por ese id'
+            });
+        }
+
+        // Actualizaciones
+        const { email, ...campos } = req.body;
+
+        if (usuarioDB.email !== email) {
+
+            const existeEmail = await Usuario.findOne({ email });
+            if (existeEmail) {
+                return res.status(400).json({
+                    ok: false,
+                    msg: 'Ya existe un usuario con ese email'
+                });
+            }
+        }
+        campos.email = email;
+        // if (!usuarioDB.google) {
+        //     campos.email = email;
+        // } else if (usuarioDB.email !== email) {
+        //     return res.status(400).json({
+        //         ok: false,
+        //         msg: 'Usuario de google no pueden cambiar su correo'
+        //     });
+        // }
+
+        const usuarioActualizado = await Usuario.findByIdAndUpdate(uid, campos, { new: true });
+
+        res.json({
+            ok: true,
+            usuario: usuarioActualizado
+        });
+
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error inesperado'
+        })
+    }
+
+}
+
 const crearUsuario = async(req, res = response) => {
 
     const { email, password } = req.body;
@@ -93,7 +154,35 @@ const crearUsuario = async(req, res = response) => {
 
 }
 
+
+const getUsuarios = async(req, res) => {
+    // var role = req.role;
+    console.log('role');
+    // console.log(role);
+    const desde = Number(req.query.desde) || 0;
+    const entrada = Number(req.query.entrada) || 5;
+
+    const [usuarios] = await Promise.all([
+        Usuario
+        .find({ role: 'USER_ROLE' }, 'nombre email role')
+        .skip(desde)
+        .limit(entrada),
+
+        Usuario.countDocuments()
+    ]);
+    total = usuarios.length;
+
+    res.json({
+        ok: true,
+        usuarios,
+        total
+    });
+
+}
+
 module.exports = {
+    actualizarUsuario,
     crearUsuario,
-    verificarKeyUnica
+    verificarKeyUnica,
+    getUsuarios
 }

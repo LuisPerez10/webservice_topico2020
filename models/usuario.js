@@ -11,14 +11,24 @@ const UsuarioSchema = Schema({
         required: true,
         unique: true
     },
+    estado: {
+        type: String,
+        default: 'inhabilitado' //  disponible, inhabilitado, trabajando
+    },
+    role: {
+        type: String,
+        required: true,
+        default: 'USER_ROLE'
+    },
     password: {
         type: String,
         required: true,
     },
     img: {
         type: String
-    }
-});
+    },
+    // timestamps: true
+}, { timestamps: true });
 
 
 UsuarioSchema.method('toJSON', function() {
