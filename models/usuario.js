@@ -17,7 +17,7 @@ const UsuarioSchema = Schema({
     },
     role: {
         type: String,
-        required: true,
+        required: false,
         default: 'USER_ROLE'
     },
     password: {

@@ -90,7 +90,6 @@ const actualizarUsuario = async(req, res = response) => {
     }
 
 }
-
 const crearUsuario = async(req, res = response) => {
 
     const { email, password } = req.body;
@@ -154,8 +153,68 @@ const crearUsuario = async(req, res = response) => {
 
 }
 
-
 const getUsuarios = async(req, res) => {
+
+    var { desde, entrada, sort, ...constula } = req.query;
+
+    desde = Number(desde) || 0;
+    entrada = Number(entrada) || 5;
+    sort = Number(sort) || 1;
+
+    console.log('req.query');
+    console.log(req.query);
+
+    const [usuarios] = await Promise.all([
+        Usuario
+        .find(constula, 'nombre email role estado createdAt')
+        .skip(desde)
+        .limit(entrada)
+        .sort({ createdAt: sort })
+
+    ]);
+    total = usuarios.length;
+
+    res.json({
+        ok: true,
+        usuarios,
+        total
+    });
+
+}
+
+const getUsuario = async(req, res) => {
+    const uid = req.params.id;
+    const { role } = req.body;
+
+    try {
+
+        const personaDB = await Persona.findOne({ "role": role });
+
+        if (!personaDB) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'No existe una persona por ese id'
+            });
+        }
+
+
+        res.json({
+            ok: true,
+            persona,
+
+        });
+
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error inesperado'
+        })
+    }
+
+
+
     // var role = req.role;
     console.log('role');
     // console.log(role);
@@ -184,5 +243,6 @@ module.exports = {
     actualizarUsuario,
     crearUsuario,
     verificarKeyUnica,
-    getUsuarios
+    getUsuarios,
+    getUsuario
 }

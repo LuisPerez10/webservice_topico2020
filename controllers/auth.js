@@ -2,6 +2,7 @@ const { response } = require('express');
 const bcrypt = require('bcryptjs');
 
 const Usuario = require('../models/usuario');
+const Persona = require('../models/persona');
 const { generarJWT } = require('../helpers/jwt');
 const { getMenuFrontEnd } = require('../helpers/menu-frontend');
 
@@ -14,7 +15,9 @@ const login = async(req, res = response) => {
 
         // Verificar email
         const usuarioDB = await Usuario.findOne({ email });
-
+        console.log(usuarioDB.uid);
+        console.log(usuarioDB.id);
+        const personaDB = await Persona.findOne({ 'usuario': usuarioDB.id });
         if (!usuarioDB) {
             return res.status(404).json({
                 ok: false,
@@ -50,6 +53,7 @@ const login = async(req, res = response) => {
             token,
             // #added
             usuario: usuarioDB,
+            persona: personaDB,
 
             menu: getMenuFrontEnd(usuarioDB.role)
         });
