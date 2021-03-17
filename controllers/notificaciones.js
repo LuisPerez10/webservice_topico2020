@@ -1,6 +1,7 @@
 const { response } = require('express');
 const axios = require('axios');
 const Notificacion = require('../models/notificacion');
+const Usuario = require('../models/usuario');
 
 const notificar = async(uid, title, mensaje, value) => {
     const data = {
@@ -44,7 +45,7 @@ const pushnotificacion = async(data, to) => {
             console.error('Error:', error);
         });
 }
-const borrarTokenFCMServices = async(req, res) => {
+const borrarTokenFCM = async(req, res) => {
     const uid = req.uid;
     console.log(uid);
     const tokenFCM = req.body.tokenFCM;
@@ -73,7 +74,7 @@ const borrarTokenFCMServices = async(req, res) => {
         })
     }
 }
-const guardarTokenFCMServices = async(req, res) => {
+const guardarTokenFCM = async(req, res) => {
     const uid = req.uid;
     const tokenFCM = req.body.tokenFCM;
     console.log('tokenFCM');
@@ -82,7 +83,7 @@ const guardarTokenFCMServices = async(req, res) => {
     console.log(uid);
 
     // await getTokensFromUID(uid);
-    await notificar(uid, 'Titulo', 'Mensaje', 'value');
+    // await notificar(uid, 'Titulo', 'Mensaje', 'value');
 
     const notificacion = await Notificacion.findOne({ 'usuario': uid });
     try {
@@ -98,7 +99,44 @@ const guardarTokenFCMServices = async(req, res) => {
             await nuevaNotificacion.save();
         } else {
             console.log('find and update');
-            await Notificacion.findOneAndUpdate({ 'usuario': uid }, { $push: { tokens: tokenFCM } }, { new: true });
+            //nin  verificar que no exista ese token en el array
+            await Notificacion.findOneAndUpdate({ 'usuario': uid, tokens: { $nin: tokenFCM } }, { $push: { tokens: tokenFCM } }, { new: true });
+        }
+
+        res.json({
+            ok: true,
+            // categoria
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Comunicate con el admin'
+        })
+    }
+}
+
+const guardarTokenFCMByEmail = async(req, res) => {
+    const tokenFCM = req.body.tokenFCM;
+    const email = req.body.email;
+
+    const usuario = await Usuario.findOne({ email: email });
+    console.log(usuario);
+    const notificacion = await Notificacion.findOne({ 'usuario': usuario.id });
+    try {
+
+        if (!notificacion) {
+            console.log('nuevo creado');
+
+            const nuevaNotificacion = new Notificacion({
+                usuario: usuario.id,
+                tokens: [tokenFCM]
+            });
+            await nuevaNotificacion.save();
+        } else {
+            console.log('find and update');
+            await Notificacion.findOneAndUpdate({ 'usuario': usuario.id }, { $push: { tokens: tokenFCM } }, { new: true });
         }
 
         res.json({
@@ -129,7 +167,7 @@ const getTokensFromUID = async(uid) => {
 
 }
 
-const guardarTokenFCMServices2 = async(req, res = response) => {
+const guardarTokenFCM2 = async(req, res = response) => {
 
     const id = req.params.id;
     const uid = req.uid;
@@ -178,6 +216,7 @@ const guardarTokenFCMServices2 = async(req, res = response) => {
 
 module.exports = {
     notificar,
-    guardarTokenFCMServices,
-    borrarTokenFCMServices
+    guardarTokenFCM,
+    borrarTokenFCM,
+    guardarTokenFCMByEmail
 }

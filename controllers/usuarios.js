@@ -5,6 +5,7 @@ const Usuario = require('../models/usuario');
 const Persona = require('../models/persona');
 const Trabajador = require('../models/trabajador');
 
+const { notificar } = require('../controllers/notificaciones');
 
 
 const verificarKeyUnica = async(req, res) => {
@@ -51,7 +52,7 @@ const actualizarUsuario = async(req, res = response) => {
         }
 
         // Actualizaciones
-        const { email, ...campos } = req.body;
+        const { password, google, email, ...campos } = req.body;
 
         if (usuarioDB.email !== email) {
 
@@ -74,6 +75,9 @@ const actualizarUsuario = async(req, res = response) => {
         // }
 
         const usuarioActualizado = await Usuario.findByIdAndUpdate(uid, campos, { new: true });
+        await notificar(uid, 'Titulo', 'Mensaje Actulizado', 'value');
+        console.log('Notificacion : Mensaje Actualizado');
+
 
         res.json({
             ok: true,
@@ -166,7 +170,7 @@ const getUsuarios = async(req, res) => {
 
     const [usuarios] = await Promise.all([
         Usuario
-        .find(constula, 'nombre email role estado createdAt')
+        .find(constula, 'nombre email img role estado createdAt')
         .skip(desde)
         .limit(entrada)
         .sort({ createdAt: sort })

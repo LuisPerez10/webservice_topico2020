@@ -1,35 +1,20 @@
-/*
-    Path: '/api/login'
-*/
 const { Router } = require('express');
-const { login, renewToken } = require('../controllers/auth');
-const { guardarTokenFCMServices, borrarTokenFCMServices } = require('../controllers/notificaciones');
-const { check } = require('express-validator');
-const { validarCampos } = require('../middlewares/validar-campos');
+const { guardarTokenFCMByEmail, guardarTokenFCM, borrarTokenFCM } = require('../controllers/notificaciones');
 const { validarJWT } = require('../middlewares/validar-jwt');
 
 const router = Router();
 
 
-// router.post('/', [
-//         check('email', 'El email es obligatorio').isEmail(),
-//         check('password', 'El password es obligatorio').not().isEmpty(),
-//         validarCampos
-//     ],
-//     login
-// );
-
-
-
-router.post('/',
+router.post('/tokenfcm',
     validarJWT,
-    // renewToken,
-    guardarTokenFCMServices
+    guardarTokenFCM
+)
+router.post('/tokenfcmemail',
+    guardarTokenFCMByEmail
 )
 router.post('/eliminar',
     validarJWT,
-    // renewToken,
-    borrarTokenFCMServices
+    borrarTokenFCM
 )
 
 

@@ -46,9 +46,7 @@ router.get('/',
 );
 
 
-router.put('/:id',
-
-    [
+router.put('/:id', [
         validarJWT,
         varlidarADMIN_ROLE_o_MismoUsuario,
         check('nombre', 'El nombre es obligatorio').not().isEmpty(),

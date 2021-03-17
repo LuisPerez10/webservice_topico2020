@@ -12,18 +12,15 @@ const login = async(req, res = response) => {
     const { email, password } = req.body;
 
     try {
+        const usuarioDB = await Usuario.findOne({ 'email': email });
 
-        // Verificar email
-        const usuarioDB = await Usuario.findOne({ email });
-        console.log(usuarioDB.uid);
-        console.log(usuarioDB.id);
-        const personaDB = await Persona.findOne({ 'usuario': usuarioDB.id });
         if (!usuarioDB) {
             return res.status(404).json({
                 ok: false,
                 msg: 'Email no encontrado'
             });
         }
+        const personaDB = await Persona.findOne({ 'usuario': usuarioDB.id });
 
         if (usuarioDB.estado == 'inhabilitado') {
             console.log('Usuario inhabilitado');
@@ -70,7 +67,7 @@ const login = async(req, res = response) => {
 
 
 
-const renewToken = async(req, res = response) => {
+const renewToken2 = async(req, res = response) => {
 
     const uid = req.uid;
     console.log(uid);
@@ -94,8 +91,40 @@ const renewToken = async(req, res = response) => {
             msg: 'Hable con el administrador usuario no valido'
         })
     }
+}
 
+const renewToken = async(req, res = response) => {
 
+    const uid = req.uid;
+    console.log(uid);
+    // Generar el TOKEN - JWT
+    const token = await generarJWT(uid);
+
+    // Obtener el usuario por UID
+    const personaDB = await Persona.findOne({ 'usuario': uid });
+    if (!personaDB) {
+        return res.status(404).json({
+            ok: false,
+            msg: 'Schema Persona no encontrado'
+        });
+    }
+    try {
+        const usuario = await Usuario.findById(uid);
+        console.log(usuario);
+        res.json({
+            ok: true,
+            token,
+            usuario,
+            persona: personaDB,
+            menu: getMenuFrontEnd(usuario.role)
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Hable con el administrador usuario no valido'
+        })
+    }
 
 
 }
