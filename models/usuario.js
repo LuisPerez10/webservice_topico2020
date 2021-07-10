@@ -13,12 +13,12 @@ const UsuarioSchema = Schema({
     },
     estado: {
         type: String,
-        default: 'inhabilitado' //  disponible, inhabilitado, trabajando
+        default: 'inhabilitado' //  disponible, inhabilitado,  habilitado trabajando
     },
     role: {
         type: String,
         required: false,
-        default: 'USER_ROLE'
+        default: 'EMPLEADOR_ROLE'
     },
     password: {
         type: String,

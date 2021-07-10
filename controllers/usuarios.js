@@ -4,8 +4,10 @@ const bcrypt = require('bcryptjs');
 const Usuario = require('../models/usuario');
 const Persona = require('../models/persona');
 const Trabajador = require('../models/trabajador');
+const Empleador = require('../models/empleador');
 
-const { notificar } = require('../controllers/notificaciones');
+const { notificarUserUpdated } = require('../controllers/notificaciones');
+const usuario = require('../models/usuario');
 
 
 const verificarKeyUnica = async(req, res) => {
@@ -65,6 +67,8 @@ const actualizarUsuario = async(req, res = response) => {
             }
         }
         campos.email = email;
+
+
         // if (!usuarioDB.google) {
         //     campos.email = email;
         // } else if (usuarioDB.email !== email) {
@@ -75,8 +79,8 @@ const actualizarUsuario = async(req, res = response) => {
         // }
 
         const usuarioActualizado = await Usuario.findByIdAndUpdate(uid, campos, { new: true });
-        await notificar(uid, 'Titulo', 'Mensaje Actulizado', 'value');
-        console.log('Notificacion : Mensaje Actualizado');
+        await notificarUserUpdated(uid, usuario.estado, campos.estado);
+        // await notificarUserUpdated(uid, 'Titulo', 'Mensaje Actulizado', 'valuess');
 
 
         res.json({
@@ -94,9 +98,10 @@ const actualizarUsuario = async(req, res = response) => {
     }
 
 }
+
 const crearUsuario = async(req, res = response) => {
 
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     try {
 
@@ -109,13 +114,12 @@ const crearUsuario = async(req, res = response) => {
             });
         }
 
-
         const usuario = new Usuario(req.body);
 
         // Encriptar contraseña
         const salt = bcrypt.genSaltSync();
         usuario.password = bcrypt.hashSync(password, salt);
-
+        usuario.estado = getEstadoFromRole(role);
 
         // Guardar usuario
         await usuario.save();
@@ -127,12 +131,32 @@ const crearUsuario = async(req, res = response) => {
 
         await persona.save();
 
+        switch (role) {
+            case 'TRABAJADOR_ROLE':
+                const trabajador = new Trabajador({
+                    persona: persona.id,
+                    ...req.body
+                });
+                // Guardar trabajador
+
+                await trabajador.save();
+                break;
+            case 'EMPLEADOR_ROLE':
+                const empleador = new Empleador({
+                    persona: persona.id,
+                    ...req.body
+                })
+                await empleador.save();
+                break;
+        }
+
         const trabajador = new Trabajador({
 
             persona: persona.id,
             ...req.body
         });
         // Guardar trabajador
+
         await trabajador.save();
         // Generar el TOKEN - JWT
         // const token = await generarJWT(usuario.id);
@@ -157,6 +181,26 @@ const crearUsuario = async(req, res = response) => {
 
 }
 
+const getEstadoFromRole = (role) => {
+
+    switch (role) {
+        case 'TRABAJADOR_ROLE':
+            return 'pendiente'
+            break;
+        case 'EMPLEADOR_ROLE':
+            return 'habilitado'
+            break;
+        case 'ADMIN_ROLE':
+            return 'habilitado'
+            break;
+        default:
+            return 'inhabilitado'
+            break;
+    }
+
+
+}
+
 const getUsuarios = async(req, res) => {
 
     var { desde, entrada, sort, ...constula } = req.query;
@@ -168,15 +212,16 @@ const getUsuarios = async(req, res) => {
     console.log('req.query');
     console.log(req.query);
 
-    const [usuarios] = await Promise.all([
+    const [usuarios, total] = await Promise.all([
         Usuario
         .find(constula, 'nombre email img role estado createdAt')
         .skip(desde)
         .limit(entrada)
-        .sort({ createdAt: sort })
-
+        .sort({ createdAt: sort }),
+        Usuario
+        .find(constula, 'nombre email img role estado createdAt').countDocuments()
     ]);
-    total = usuarios.length;
+    // total = usuarios.length;
 
     res.json({
         ok: true,

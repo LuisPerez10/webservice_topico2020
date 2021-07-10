@@ -5,6 +5,7 @@ const Usuario = require('../models/usuario');
 const Persona = require('../models/persona');
 const { generarJWT } = require('../helpers/jwt');
 const { getMenuFrontEnd } = require('../helpers/menu-frontend');
+const { esEstadoDenegadoRol } = require('../helpers/access-estado');
 
 
 const login = async(req, res = response) => {
@@ -22,11 +23,12 @@ const login = async(req, res = response) => {
         }
         const personaDB = await Persona.findOne({ 'usuario': usuarioDB.id });
 
-        if (usuarioDB.estado == 'inhabilitado') {
-            console.log('Usuario inhabilitado');
+        if (esEstadoDenegadoRol(usuarioDB.estado)) {
+            console.log('Usuario no disponible  temporalmente');
+            console.log(usuarioDB);
             return res.status(400).json({
                 ok: false,
-                msg: 'Usuario inhabilitado'
+                msg: 'Usuario no disponible temporalmente'
             });
         }
 

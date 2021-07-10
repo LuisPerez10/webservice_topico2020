@@ -13,6 +13,37 @@ const notificar = async(uid, title, mensaje, value) => {
     pushnotificacion(data, tokens);
 }
 
+const notificarUserUpdated = (uid, estado, nuevoestado) => {
+
+    if (estado == "pendiente" && nuevoestado == "habilitado") {
+        notificar(uid, "Solicitud de registro Aceptada 😀 👍", "Tu solicitud ha sido aceptada 😀, ahora puedes iniciar sesion💪 ", "habilitado")
+        return;
+    }
+
+    switch (nuevoestado) {
+        case estado:
+            // notificar(uid,"")
+            notificar(uid, "Usuario Actualizado 👍", "Tu cuenta de usuario ha sido actualizada 😀", "")
+            return
+            break;
+        case 'inhabilitado':
+            notificar(uid, "⚠ Usuario suspendido! ⚠", "Tu cuenta de usuario ha sido suspendida temporalmente", "inhabilitado")
+
+
+            break;
+        case 'habilitado':
+            notificar(uid, "Usuario habilitado! 😀", "Tu solicitud ha sido aceptada, ahora puedes iniciar autenticarte", "habilitado")
+            break;
+        case 'pendiente':
+            notificar(uid, "Usuario suspendido! ⚠", "Tu cuenta de usuario esta siendo evaluada, Tu cuenta de usuario ha sido suspendida temporalmente ", "pendiente")
+            break;
+        default:
+            notificar(uid, "Usuario Actualizado 👍 ", "Tu cuenta de usuario ha sido actualizada")
+            break;
+    }
+    return;
+}
+
 const pushnotificacion = async(data, to) => {
 
     const body = {
@@ -25,7 +56,7 @@ const pushnotificacion = async(data, to) => {
         "priority": "high",
         "notification": {
             "title": data.title,
-            "body": data.body
+            "body": data.mensaje
         },
         "registration_ids": to
             // "to": 
@@ -216,6 +247,7 @@ const guardarTokenFCM2 = async(req, res = response) => {
 
 module.exports = {
     notificar,
+    notificarUserUpdated,
     guardarTokenFCM,
     borrarTokenFCM,
     guardarTokenFCMByEmail
